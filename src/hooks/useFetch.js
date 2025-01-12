@@ -1,47 +1,42 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react'
 
-const useFetch = (url, method = 'GET', body = null) => {
-  const [data, setData] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+const useFetch = (url) => {
+    const [data,setData]= useState([])
+    const [error,setError]= useState(null)
+    const [loading,setLoading]= useState(false)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+    useEffect(() =>{
 
-      const options = {
-        method: method, // Method (GET, POST, PUT, DELETE)
-        credentials: 'include', // Include credentials (cookies)
-        headers: {
-          'Content-Type': 'application/json', // Set the content type to JSON
-        },
-      };
+        const fetchData = async()=>{
+            setLoading (true) 
 
-      // If it's a POST or PUT request, include the body
-      if (body && (method === 'POST' || method === 'PUT')) {
-        options.body = JSON.stringify(body);
-      }
+            try{
+                const res = await fetch(url)
 
-      try {
-        const res = await fetch(url, options);
+                if(!res.ok) {
+                    setError("failed to fetch");
+                    // alert("failed to fetch");
+                }
+                const result = await res.json();
+                setData(result.data);
+                setLoading(false); 
 
-        if (!res.ok) {
-          setError("Failed to fetch");
-        }
+            }catch(err) {
+                setError(err.message);
+                setLoading(false);
+            }
+        };
 
-        const result = await res.json();
-        setData(result.data);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
+        fetchData();
 
-    fetchData();
-  }, [url, method, body]);
-
-  return { data, error, loading };
+    }, [url]);
+    return {
+            data, 
+            error, 
+            loading,
+        };
+  
 };
 
-export default useFetch;
+export default useFetch
+
