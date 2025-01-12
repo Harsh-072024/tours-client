@@ -1,42 +1,47 @@
-import {useState, useEffect} from 'react'
+import { useState, useEffect } from 'react';
 
-const useFetch = (url) => {
-    const [data,setData]= useState([])
-    const [error,setError]= useState(null)
-    const [loading,setLoading]= useState(false)
+const useFetch = (url, method = 'GET', body = null) => {
+  const [data, setData] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-    useEffect(() =>{
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
 
-        const fetchData = async()=>{
-            setLoading (true) 
+      const options = {
+        method: method, // Method (GET, POST, PUT, DELETE)
+        credentials: 'include', // Include credentials (cookies)
+        headers: {
+          'Content-Type': 'application/json', // Set the content type to JSON
+        },
+      };
 
-            try{
-                const res = await fetch(url)
+      // If it's a POST or PUT request, include the body
+      if (body && (method === 'POST' || method === 'PUT')) {
+        options.body = JSON.stringify(body);
+      }
 
-                if(!res.ok) {
-                    setError("failed to fetch");
-                    // alert("failed to fetch");
-                }
-                const result = await res.json();
-                setData(result.data);
-                setLoading(false); 
+      try {
+        const res = await fetch(url, options);
 
-            }catch(err) {
-                setError(err.message);
-                setLoading(false);
-            }
-        };
+        if (!res.ok) {
+          setError("Failed to fetch");
+        }
 
-        fetchData();
+        const result = await res.json();
+        setData(result.data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
 
-    }, [url]);
-    return {
-            data, 
-            error, 
-            loading,
-        };
-  
+    fetchData();
+  }, [url, method, body]);
+
+  return { data, error, loading };
 };
 
-export default useFetch
-
+export default useFetch;
